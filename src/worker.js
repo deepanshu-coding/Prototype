@@ -10,8 +10,6 @@
  *   DELETE /api/ledger → wipe the ledger
  */
 
-import HTML from './index.html';
-
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
@@ -37,9 +35,7 @@ export default {
 
     // ── Static app ────────────────────────────────────────────
     if (pathname === '/' || pathname === '/index.html') {
-      return new Response(HTML, {
-        headers: { 'Content-Type': 'text/html;charset=UTF-8' },
-      });
+      return fetch(request); // falls through to Pages static asset
     }
 
     // ── API ───────────────────────────────────────────────────
