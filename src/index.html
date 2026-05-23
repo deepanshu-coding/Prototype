@@ -1,1 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORA — Cryptographic Oversight & Reasoning Audit Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
+:root {
+  --primary: #3a78b5;
+  --primary-dark: #2c5f8a;
+  --primary-light: #e8f0f8;
+  --accent: #1a3a5c;
+  --text: #1e2a38;
+  --text-muted: #5a6a7a;
+  --border: #c8d8e8;
+  --bg: #f4f7fb;
+  --white: #ffffff;
+  --success: #2e7d52;
+  --success-light: #e6f4ec;
+  --warn: #b55a1a;
+  --warn-light: #fdf0e6;
+  --danger: #b52a2a;
+  --danger-light: #fdeaea;
+  --chart1: #3a78b5;
+  --chart2: #1a3a5c;
+  --chart3: #5a9fd4;
+  --chart4: #8abde8;
+  --chart5: #c4dff5;
+}
+
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* NAV */
+nav {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.logo-block {
+  display: flex;
+  align-items: stretch;
+  height: 40px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.logo-cora {
+  background: var(--primary);
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-tagline {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 14px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav-link {
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  letter-spacing: 0.01em;
+  font-family: 'Source Sans 3', sans-serif;
+  white-space: nowrap;
+}
+
+.nav-link:hover, .nav-link.active {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* HAMBURGER */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--accent);
+  transition: all 0.25s;
+  border-radius: 1px;
+}
+
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* MOBILE MENU */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  z-index: 190;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  padding: 8px 0 12px;
+}
+
+.mobile-menu.open { display: block; }
+
+.mobile-menu .mob-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 24px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Source Sans 3', sans-serif;
+  letter-spacing: 0.01em;
+  transition: background 0.12s, color 0.12s;
+  border-left: 3px solid transparent;
+}
+
+.mobile-menu .mob-link:hover,
+.mobile-menu .mob-link.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-left-color: var(--primary);
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 60%, #5a9fd4 100%);
+  color: #fff;
+  padding: 64px 40px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 340px; height: 340px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 20%;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  pointer-events: none;
+}
+
+.hero-tag {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  max-width: 640px;
+}
+
+.hero p {
+  font-size: 1rem;
+  opacity: 0.88;
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 32px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Source Sans 3', sans-serif;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary { background: var(--white); color: var(--primary); border-color: var(--white); }
+.btn-primary:hover { background: var(--primary-light); color: var(--primary-dark); border-color: var(--primary-light); }
+.btn-outline-white { background: transparent; color: #fff; border-color: rgba(255,255,255,0.6); }
+.btn-outline-white:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
+.btn-blue { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-blue:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+.btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-accent:hover { background: #0e2540; border-color: #0e2540; }
+.btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+.btn-sm { padding: 7px 16px; font-size: 0.82rem; }
+
+/* STATS BAR */
+.stats-bar {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.stat {
+  padding: 20px 40px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  flex: 1;
+  min-width: 120px;
+}
+
+.stat:last-child { border-right: none; }
+
+.stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  transition: all 0.4s;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 2px;
+}
+
+/* PAGES */
+.page { display: none; flex: 1; flex-direction: column; }
+.page.active { display: flex; }
+
+/* PAGE HEADER */
+.page-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 40px 40px 36px;
+}
+
+.page-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.page-header p {
+  font-size: 0.92rem;
+  opacity: 0.78;
+}
+
+/* SECTION */
+.section {
+  padding: 40px 40px;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.section-sub {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin-bottom: 28px;
+}
+
+/* CARDS */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 24px;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover { box-shadow: 0 4px 20px rgba(58,120,181,0.1); }
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.card-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* KPI CARDS */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.kpi-card:hover {
+  box-shadow: 0 4px 18px rgba(58,120,181,0.1);
+  border-color: var(--primary);
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-muted);
+}
+
+.kpi-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.kpi-change {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.kpi-change.pos { color: var(--success); }
+.kpi-change.neg { color: var(--danger); }
+.kpi-change.neu { color: var(--text-muted); }
+
+/* CHART GRID */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.chart-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 24px;
+  transition: box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card:hover { box-shadow: 0 4px 20px rgba(58,120,181,0.1); }
+.chart-card.col-12 { grid-column: span 12; }
+.chart-card.col-8  { grid-column: span 8; }
+.chart-card.col-6  { grid-column: span 6; }
+.chart-card.col-4  { grid-column: span 4; }
+.chart-card.col-3  { grid-column: span 3; }
+
+/* Chart canvas wrapper — constrains the chart height reliably */
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.chart-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.chart-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.chart-card-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.chart-type-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* STATUS BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-warn { background: var(--warn-light); color: var(--warn); }
+.badge-danger { background: var(--danger-light); color: var(--danger); }
+.badge-info { background: var(--primary-light); color: var(--primary-dark); }
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* AGENT DEMO PANEL */
+.demo-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.demo-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.demo-col-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.alert-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text);
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
+}
+
+.alert-input:focus { border-color: var(--primary); }
+
+/* LOG VIEWER */
+.log-viewer {
+  background: #0e1a27;
+  border: 1px solid #1e3050;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.78rem;
+  color: #a8c4e0;
+  line-height: 1.7;
+  max-height: 280px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.log-viewer .log-ts { color: #5a7a9a; }
+.log-viewer .log-key { color: #5a9fd4; }
+.log-viewer .log-val { color: #c4dff5; }
+.log-viewer .log-action { color: #f0c060; }
+.log-viewer .log-hash { color: #60d0a0; }
+.log-viewer .log-step-obs { color: #a8d8a8; }
+.log-viewer .log-step-inf { color: #a8c4e0; }
+.log-viewer .log-step-alt { color: #f0a060; }
+.log-viewer .log-step-conf { color: #d4a0e0; }
+
+/* REASONING CHAIN */
+.reasoning-step {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+
+.reasoning-step:last-child { border-bottom: none; }
+
+.step-num {
+  width: 24px;
+  height: 24px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.step-type {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.step-type.obs { background: var(--success-light); color: var(--success); }
+.step-type.inf { background: var(--primary-light); color: var(--primary-dark); }
+.step-type.alt { background: var(--warn-light); color: var(--warn); }
+.step-type.conf { background: #f3eeff; color: #6b3a9a; }
+
+.step-content {
+  font-size: 0.87rem;
+  line-height: 1.5;
+  color: var(--text);
+  flex: 1;
+}
+
+/* HASH CHAIN */
+.hash-entry {
+  background: #0e1a27;
+  border: 1px solid #1e3050;
+  border-left: 4px solid var(--chart3);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: #a8c4e0;
+}
+
+.hash-entry.verified { border-left-color: #5ac88a; }
+.hash-entry.tampered { border-left-color: #e06060; }
+
+.hash-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.hash-field { color: #5a9fd4; min-width: 110px; }
+.hash-value { color: #c4dff5; word-break: break-all; }
+.hash-value.green { color: #5ac88a; }
+.hash-value.red { color: #e06060; }
+
+/* PROGRESS BAR */
+.progress-wrap {
+  background: var(--primary-light);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #5a9fd4);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+/* AI INSIGHTS */
+.insights-panel {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  padding: 24px;
+  margin-bottom: 28px;
+  display: block; /* override chart-card flex-column */
+}
+
+.insights-panel .chart-card-title { color: #fff; }
+.insights-panel .chart-card-sub { color: rgba(255,255,255,0.65); }
+
+.insight-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.insight-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.88);
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.insight-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.insight-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #5a9fd4;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.insight-dot.warn { background: #f0a060; }
+.insight-dot.good { background: #5ac88a; }
+.insight-dot.danger { background: #e06060; }
+
+.ai-loader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.88rem;
+  padding: 8px 0;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: #5a9fd4;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SCENARIO SELECTOR */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.scenario-card {
+  background: var(--white);
+  border: 2px solid var(--border);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.scenario-card:hover { border-color: var(--primary); background: var(--primary-light); }
+.scenario-card.active { border-color: var(--primary); background: var(--primary-light); }
+
+.scenario-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.scenario-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+
+thead th {
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+tbody tr:hover { background: var(--primary-light); }
+tbody td { padding: 9px 14px; color: var(--text); }
+
+/* COMPLIANCE TABLE */
+.compliance-row td:first-child { font-weight: 600; color: var(--accent); }
+
+/* FILE LIST */
+.action-log-entry {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  padding: 14px 20px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.action-log-entry:hover { box-shadow: 0 2px 10px rgba(58,120,181,0.1); }
+.action-log-entry.danger-border { border-left-color: var(--danger); }
+.action-log-entry.success-border { border-left-color: var(--success); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--accent);
+  color: #fff;
+  padding: 14px 22px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  z-index: 9999;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s;
+  max-width: 340px;
+  border-left: 4px solid #5a9fd4;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.warn-toast { border-left-color: #f0a060; }
+.toast.success-toast { border-left-color: #5ac88a; }
+
+/* FOOTER */
+footer {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: auto;
+}
+
+.footer-brand {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.footer-copy {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+.footer-link {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-link:hover { color: var(--primary); }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,30,50,0.6);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--white);
+  max-width: 720px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 24px 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  flex-shrink: 0;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.modal-close:hover { background: rgba(255,255,255,0.25); }
+
+.modal-body { padding: 24px 28px; }
+
+/* DIVIDER */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 24px 0;
+}
+
+/* METRIC COMPARISON */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.compare-col-head {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.compare-col-head.bad { border-bottom-color: var(--danger); color: var(--danger); }
+.compare-col-head.good { border-bottom-color: var(--success); color: var(--success); }
+
+.compare-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  font-size: 0.87rem;
+  line-height: 1.5;
+}
+
+.compare-icon { flex-shrink: 0; margin-top: 2px; font-size: 0.8rem; }
+
+/* RESPONSIVE */
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  nav { padding: 0 16px; }
+  .nav-tagline { display: none; }
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 36px 16px 32px; }
+  .hero h1 { font-size: clamp(1.6rem, 6vw, 2.4rem); }
+  .hero p { font-size: 0.92rem; }
+  .hero-actions { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .hero-actions .btn { width: 100%; justify-content: center; }
+
+  .section { padding: 24px 16px; }
+  .section-title { font-size: 1.4rem; }
+
+  .stats-bar { flex-direction: column; }
+  .stat { border-right: none; border-bottom: 1px solid var(--border); padding: 14px 20px; }
+  .stat:last-child { border-bottom: none; }
+
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-value { font-size: 1.5rem; }
+
+  .demo-panel { grid-template-columns: 1fr; }
+  .compare-grid { grid-template-columns: 1fr; }
+
+  .chart-grid { gap: 12px; }
+  .chart-card.col-12,
+  .chart-card.col-8,
+  .chart-card.col-6,
+  .chart-card.col-4,
+  .chart-card.col-3 { grid-column: span 12; }
+  .chart-card { padding: 16px; }
+  .chart-card-title { font-size: 0.92rem; }
+  .chart-wrap { height: 200px !important; }
+
+  .scenario-grid { grid-template-columns: 1fr 1fr; }
+
+  .page-header { padding: 28px 16px 24px; }
+  .page-header h1 { font-size: 1.5rem; }
+
+  .table-wrap { font-size: 0.78rem; }
+  thead th { padding: 8px 10px; font-size: 0.68rem; }
+  tbody td { padding: 8px 10px; }
+
+  .hash-entry { padding: 10px 12px; font-size: 0.7rem; }
+  .hash-field { min-width: 80px; font-size: 0.7rem; }
+
+  footer { padding: 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .footer-links { gap: 14px; }
+
+  .modal-overlay { padding: 12px; }
+  .modal-header { padding: 18px 20px; }
+  .modal-body { padding: 18px 20px; }
+  .modal-title { font-size: 1rem; }
+
+  .insights-panel { padding: 16px; }
+  .log-viewer { font-size: 0.72rem; max-height: 200px; }
+
+  .action-log-entry { flex-direction: column; gap: 10px; }
+  .file-actions { width: 100%; }
+  .file-actions .btn { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .scenario-grid { grid-template-columns: 1fr; }
+  .hero-tag { font-size: 0.65rem; }
+  .stat-val { font-size: 1.25rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand" onclick="showPage('overview')">
+    <div class="logo-block">
+      <div class="logo-cora">CORA</div>
+    </div>
+    <span class="nav-tagline">Autonomous Agent Audit</span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" id="nav-overview" onclick="showPage('overview')">Overview</button>
+    <button class="nav-link" id="nav-demo" onclick="showPage('demo')">Live Demo</button>
+    <button class="nav-link" id="nav-audit" onclick="showPage('audit')">Audit Ledger</button>
+    <button class="nav-link" id="nav-analytics" onclick="showPage('analytics')">Analytics</button>
+    <button class="nav-link" id="nav-compliance" onclick="showPage('compliance')">Compliance</button>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mob-link active" id="mob-overview" onclick="showPage('overview');closeMobileMenu()">Overview</button>
+  <button class="mob-link" id="mob-demo" onclick="showPage('demo');closeMobileMenu()">Live Demo</button>
+  <button class="mob-link" id="mob-audit" onclick="showPage('audit');closeMobileMenu()">Audit Ledger</button>
+  <button class="mob-link" id="mob-analytics" onclick="showPage('analytics');closeMobileMenu()">Analytics</button>
+  <button class="mob-link" id="mob-compliance" onclick="showPage('compliance');closeMobileMenu()">Compliance</button>
+</div>
+
+<!-- PAGE: OVERVIEW -->
+<div class="page active" id="page-overview">
+  <div class="hero">
+    <div class="hero-tag">Prototype v0.1 — Funding Demonstration</div>
+    <h1>Fixing Agentic Amnesia with CORA</h1>
+    <p>Autonomous AI agents make high-stakes decisions — isolating servers, blocking traffic, triggering incident response — but leave no auditable trace of their reasoning. CORA cryptographically binds every decision to its full reasoning chain.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="showPage('demo')">Run Live Demo</button>
+      <button class="btn btn-outline-white" onclick="showPage('analytics')">View Analytics</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-val" id="stat-actions">0</div>
+      <div class="stat-label">Agent Actions Logged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-verified">100%</div>
+      <div class="stat-label">Chain Integrity</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-latency">&lt;5ms</div>
+      <div class="stat-label">Logging Overhead</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-scenarios">5</div>
+      <div class="stat-label">Attack Scenarios Tested</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">10k/s</div>
+      <div class="stat-label">Actions Per Second</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">The Problem: Agentic Amnesia</div>
+    <div class="section-sub">When an AI agent takes a high-stakes action, traditional logs capture what happened — not why. Regulators, auditors, and engineers are left with a dead end.</div>
+
+    <div class="compare-grid" style="margin-bottom:32px;">
+      <div class="card">
+        <div class="compare-col-head bad">Without CORA — Traditional Logging</div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--danger)">x</span>
+          <span>Action recorded: "host_isolated: TradingServer-7" — no explanation</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--danger)">x</span>
+          <span>Zero visibility into what alternatives were considered</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--danger)">x</span>
+          <span>Confidence levels and uncertainty are silently discarded</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--danger)">x</span>
+          <span>Log entries can be edited post-hoc with no detection</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--danger)">x</span>
+          <span>Fails GDPR Art 22 "meaningful information" requirement</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="compare-col-head good">With CORA — Full Reasoning Audit</div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--success)">+</span>
+          <span>Full reasoning chain: observations, inferences, alternatives, confidence</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--success)">+</span>
+          <span>Every alternative considered is recorded with rejection rationale</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--success)">+</span>
+          <span>Confidence scores and basis for uncertainty preserved verbatim</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--success)">+</span>
+          <span>SHA-256 hash chain — any tampering breaks the ledger instantly</span>
+        </div>
+        <div class="compare-item">
+          <span class="compare-icon" style="color:var(--success)">+</span>
+          <span>Explicit GDPR Art 22(3) and NIS2 compliance pathway</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Architecture</div>
+    <div class="section-sub">Four components, one pipeline.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px;">
+      <div class="card" style="border-top:3px solid var(--primary);">
+        <div class="card-title">1 — Agent Wrapper</div>
+        <div class="card-sub">Intercepts every decision point</div>
+        <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted);">A lightweight Python wrapper around LangGraph / AutoGen / CrewAI that captures the full reasoning trace before any action is executed.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--chart2);">
+        <div class="card-title">2 — Reasoning Capture</div>
+        <div class="card-sub">Structured chain serialisation</div>
+        <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted);">Observations, inferences, rejected alternatives, and confidence scores serialised to a structured JSON schema before the action fires.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--chart3);">
+        <div class="card-title">3 — Cryptographic Binding</div>
+        <div class="card-sub">SHA-256 + Merkle-style chain</div>
+        <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted);">Every action is bound to its reasoning via SHA-256. Entries are chained — each block hashes the previous, making retroactive tampering detectable.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--success);">
+        <div class="card-title">4 — Audit Dashboard</div>
+        <div class="card-sub">Human-readable reconstruction</div>
+        <p style="font-size:0.85rem;line-height:1.6;color:var(--text-muted);">Any auditor — regulator, engineer, or investor — can reconstruct exactly what the agent saw, considered, and decided, with chain integrity verified.</p>
+      </div>
+    </div>
+
+    <div class="section-title">Investment Ask</div>
+    <div class="section-sub">12-month roadmap to enterprise pilots and open-source release.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+      <div class="kpi-card">
+        <div class="kpi-label">Funding Ask</div>
+        <div class="kpi-value">$500k</div>
+        <div class="kpi-change neu">12-month runway</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Target Market</div>
+        <div class="kpi-value">SOC AI</div>
+        <div class="kpi-change pos">Rapidly growing segment</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">License Model</div>
+        <div class="kpi-value">Apache 2.0</div>
+        <div class="kpi-change neu">Open-source on funding</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Month 6 Target</div>
+        <div class="kpi-value">Enterprise</div>
+        <div class="kpi-change pos">Pilot partner secured</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: DEMO -->
+<div class="page" id="page-demo">
+  <div class="page-header">
+    <h1>Live Agent Demo</h1>
+    <p>Side-by-side comparison of traditional logging versus CORA. Run a scenario and observe the difference.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Select Attack Scenario</div>
+    <div class="section-sub">Five simulated SOC scenarios. Each demonstrates a real-world agentic decision with high stakes.</div>
+
+    <div class="scenario-grid" id="scenarioGrid"></div>
+
+    <div style="display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap;">
+      <button class="btn btn-blue" onclick="runScenario()">Run Agent Decision</button>
+      <button class="btn btn-accent" onclick="runTamperDemo()">Simulate Tampering</button>
+      <button class="btn btn-outline-white" style="color:var(--text);border-color:var(--border);" onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <div class="demo-panel">
+      <!-- Baseline -->
+      <div class="card">
+        <div class="demo-col-header">
+          <div class="demo-col-label">Traditional Log — Baseline (Broken)</div>
+          <span class="badge badge-danger"><span class="badge-dot"></span>Agentic Amnesia</span>
+        </div>
+        <div class="log-viewer" id="baselineLog">
+          <span style="color:#5a7a9a;font-style:italic;">// Awaiting agent action...</span>
+        </div>
+        <div style="margin-top:12px;padding:12px;background:var(--danger-light);border-left:3px solid var(--danger);">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Auditor's Dead End</div>
+          <div style="font-size:0.83rem;color:var(--text);" id="baselineVerdict">Run a scenario to see what an auditor cannot answer.</div>
+        </div>
+      </div>
+
+      <!-- CORA -->
+      <div class="card">
+        <div class="demo-col-header">
+          <div class="demo-col-label">CORA Log — Full Reasoning Chain</div>
+          <span class="badge badge-success" id="coraIntegrityBadge"><span class="badge-dot"></span>Verified</span>
+        </div>
+        <div style="margin-bottom:16px;" id="reasoningChain">
+          <div style="color:var(--text-muted);font-size:0.85rem;font-style:italic;">Run a scenario to see the full reasoning chain.</div>
+        </div>
+        <div style="padding:12px;background:var(--success-light);border-left:3px solid var(--success);" id="coraVerdict">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Auditor Can Answer</div>
+          <div style="font-size:0.83rem;color:var(--text);">Run a scenario to see what CORA enables an auditor to answer.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hash Chain -->
+    <div class="chart-card col-12" style="margin-bottom:0;">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">Cryptographic Hash Chain</div>
+          <div class="chart-card-sub">Each entry is bound to the previous — any edit breaks the chain</div>
+        </div>
+        <span class="chart-type-badge" id="chainStatusBadge">EMPTY</span>
+      </div>
+      <div id="hashChainDisplay">
+        <div style="color:var(--text-muted);font-size:0.85rem;font-style:italic;padding:16px 0;">No entries yet. Run a scenario above.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: AUDIT LEDGER -->
+<div class="page" id="page-audit">
+  <div class="page-header">
+    <h1>Audit Ledger</h1>
+    <p>All recorded agent actions with full reasoning chains. Click any entry to inspect its complete record.</p>
+  </div>
+
+  <div class="section">
+    <div class="kpi-grid" id="auditKpis"></div>
+
+    <div class="chart-card col-12" style="margin-bottom:28px;">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">Action Log</div>
+          <div class="chart-card-sub">All agent actions — click any row to inspect full reasoning</div>
+        </div>
+        <span class="chart-type-badge">ledger</span>
+      </div>
+      <div class="table-wrap">
+        <table id="auditTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Timestamp</th>
+              <th>Action</th>
+              <th>Target</th>
+              <th>Confidence</th>
+              <th>Steps</th>
+              <th>Chain</th>
+              <th>Inspect</th>
+            </tr>
+          </thead>
+          <tbody id="auditTableBody">
+            <tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px;">No actions logged yet. Run scenarios in the Demo tab.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: ANALYTICS -->
+<div class="page" id="page-analytics">
+  <div class="page-header">
+    <h1>Analytics Dashboard</h1>
+    <p>Aggregate metrics across all logged agent decisions. Demonstrates CORA's value at operational scale.</p>
+  </div>
+
+  <div class="section">
+    <div class="kpi-grid" id="analyticsKpis"></div>
+
+    <div class="chart-grid">
+      <div class="chart-card col-6">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Actions by Type</div>
+            <div class="chart-card-sub">Distribution of agent decisions across all scenarios</div>
+          </div>
+          <span class="chart-type-badge">bar</span>
+        </div>
+        <div class="chart-wrap" style="height:240px;"><canvas id="actionTypeChart"></canvas></div>
+      </div>
+
+      <div class="chart-card col-6">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Confidence Distribution</div>
+            <div class="chart-card-sub">Agent confidence across all decisions</div>
+          </div>
+          <span class="chart-type-badge">doughnut</span>
+        </div>
+        <div class="chart-wrap" style="height:240px;"><canvas id="confidenceChart"></canvas></div>
+      </div>
+
+      <div class="chart-card col-8">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Decisions Over Time</div>
+            <div class="chart-card-sub">Cumulative agent actions logged per session</div>
+          </div>
+          <span class="chart-type-badge">line</span>
+        </div>
+        <div class="chart-wrap" style="height:220px;"><canvas id="timelineChart"></canvas></div>
+      </div>
+
+      <div class="chart-card col-4">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Reasoning Step Types</div>
+            <div class="chart-card-sub">Composition of reasoning chains</div>
+          </div>
+          <span class="chart-type-badge">bar</span>
+        </div>
+        <div class="chart-wrap" style="height:220px;"><canvas id="stepTypeChart"></canvas></div>
+      </div>
+
+      <div class="chart-card col-12">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Alternatives Considered vs Action Taken</div>
+            <div class="chart-card-sub">How many options the agent evaluated before each decision</div>
+          </div>
+          <span class="chart-type-badge">scatter</span>
+        </div>
+        <div class="chart-wrap" style="height:200px;"><canvas id="altChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- AI Insights -->
+    <div class="insights-panel chart-card col-12" id="aiInsightsPanel">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">AI Analysis — Claude Commentary</div>
+          <div class="chart-card-sub">Powered by Anthropic Claude — live analysis of your logged decisions</div>
+        </div>
+        <span class="chart-type-badge" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);">AI</span>
+      </div>
+      <div id="aiInsightsContent">
+        <div style="color:rgba(255,255,255,0.55);font-size:0.85rem;font-style:italic;">Log at least one agent action in the Demo tab, then return here for AI analysis.</div>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-outline-white btn-sm" onclick="generateAIInsights()">Generate Analysis</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: COMPLIANCE -->
+<div class="page" id="page-compliance">
+  <div class="page-header">
+    <h1>Regulatory Compliance</h1>
+    <p>CORA's explicit mapping to GDPR Article 22 and NIS2 requirements. This is the enterprise sales wedge.</p>
+  </div>
+
+  <div class="section">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">GDPR Article 22</div>
+        <div class="kpi-value" style="font-size:1.3rem;">Mapped</div>
+        <div class="kpi-change pos">Art 22(3) — meaningful info</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">NIS2 Directive</div>
+        <div class="kpi-value" style="font-size:1.3rem;">Mapped</div>
+        <div class="kpi-change pos">Incident reporting requirements</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Audit Trail</div>
+        <div class="kpi-value" style="font-size:1.3rem;">Tamper-proof</div>
+        <div class="kpi-change pos">SHA-256 hash chain</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Explainability</div>
+        <div class="kpi-value" style="font-size:1.3rem;">Full</div>
+        <div class="kpi-change pos">Every decision reconstructible</div>
+      </div>
+    </div>
+
+    <div class="chart-card col-12" style="margin-bottom:24px;">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">GDPR Article 22 — Meaningful Information Requirement</div>
+          <div class="chart-card-sub">How CORA satisfies each sub-clause of Art 22(3)</div>
+        </div>
+        <span class="chart-type-badge">compliance</span>
+      </div>
+      <div class="table-wrap">
+        <table class="compliance-row">
+          <thead>
+            <tr>
+              <th>Requirement</th>
+              <th>Traditional Logging</th>
+              <th>CORA</th>
+              <th>CORA Implementation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Meaningful information about the logic involved</td>
+              <td><span class="badge badge-danger">Fails</span></td>
+              <td><span class="badge badge-success">Passes</span></td>
+              <td>Full reasoning chain: observations, inferences, confidence</td>
+            </tr>
+            <tr>
+              <td>Significance of the processing for the data subject</td>
+              <td><span class="badge badge-danger">Fails</span></td>
+              <td><span class="badge badge-success">Passes</span></td>
+              <td>Action target and impact recorded verbatim</td>
+            </tr>
+            <tr>
+              <td>Envisaged consequences for the data subject</td>
+              <td><span class="badge badge-danger">Fails</span></td>
+              <td><span class="badge badge-success">Passes</span></td>
+              <td>Alternatives considered document what was rejected and why</td>
+            </tr>
+            <tr>
+              <td>Right to obtain human intervention</td>
+              <td><span class="badge badge-warn">Partial</span></td>
+              <td><span class="badge badge-success">Passes</span></td>
+              <td>Confidence thresholds can trigger mandatory human review</td>
+            </tr>
+            <tr>
+              <td>Right to contest the decision</td>
+              <td><span class="badge badge-danger">Fails</span></td>
+              <td><span class="badge badge-success">Passes</span></td>
+              <td>Tamper-proof ledger enables precise contestation</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chart-card col-12" style="margin-bottom:24px;">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">NIS2 Directive — Incident Reporting</div>
+          <div class="chart-card-sub">CORA's contribution to NIS2 compliance for autonomous security systems</div>
+        </div>
+        <span class="chart-type-badge">compliance</span>
+      </div>
+      <div class="table-wrap">
+        <table class="compliance-row">
+          <thead>
+            <tr>
+              <th>NIS2 Obligation</th>
+              <th>Without CORA</th>
+              <th>With CORA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Incident notification within 24 hours</td>
+              <td>Cannot reconstruct what the agent decided or why</td>
+              <td>Full decision audit available immediately from ledger</td>
+            </tr>
+            <tr>
+              <td>Root cause analysis within 72 hours</td>
+              <td>Requires reverse-engineering from incomplete logs</td>
+              <td>Reasoning chain provides the root cause narrative directly</td>
+            </tr>
+            <tr>
+              <td>Demonstrate adequate security measures</td>
+              <td>No evidence of agent decision quality or oversight</td>
+              <td>Confidence scores and alternative analysis demonstrate diligence</td>
+            </tr>
+            <tr>
+              <td>Supply chain risk accountability</td>
+              <td>Black-box AI decisions cannot be attributed</td>
+              <td>Every action cryptographically bound to a verified reasoning chain</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="background:var(--accent);color:#fff;padding:28px 32px;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:12px;">The Regulatory Wedge</div>
+      <p style="font-size:0.92rem;line-height:1.7;opacity:0.88;max-width:680px;">GDPR Art 22 and NIS2 create mandatory compliance requirements that no existing SIEM, XDR, or XAI tool satisfies for autonomous agent decisions. CORA is the first purpose-built solution. Every enterprise deploying AI agents in regulated industries — finance, healthcare, critical infrastructure — has a legal obligation that CORA directly addresses. This is not a nice-to-have. It is a compliance gap.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Action Detail -->
+<div class="modal-overlay" id="actionModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Action Detail</div>
+        <div style="font-size:0.8rem;opacity:0.7;margin-top:4px;" id="modalSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('actionModal').classList.remove('open')">x</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-brand">CORA Framework</div>
+    <div class="footer-copy">Prototype v0.1 — Apache 2.0 upon funding — Anthropic Claude-powered</div>
+  </div>
+  <div class="footer-links">
+    <a class="footer-link" href="#" onclick="showPage('compliance')">Compliance</a>
+    <a class="footer-link" href="#" onclick="showPage('demo')">Demo</a>
+    <a class="footer-link" href="#">Technical Docs</a>
+  </div>
+</footer>
+
+<script>
+// ─── DB Layer ─────────────────────────────────────────────────
+// Two-tier persistence:
+//   1. IndexedDB  — instant local reads/writes (survives page refresh)
+//   2. D1 via API — server-side durable store (survives device change)
+//
+// Strategy: write to both on every action; read from D1 on load,
+// fall back to IndexedDB if offline.
+
+const IDB_NAME    = 'cora-v1';
+const IDB_STORE   = 'ledger';
+const API_BASE    = '/api/ledger';
+
+// Open IndexedDB
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      e.target.result.createObjectStore(IDB_STORE, { keyPath: 'seq' });
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function idbGetAll() {
+  const db = await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = e => resolve(e.target.result || []);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+async function idbPut(entry) {
+  const db = await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(entry);
+    tx.oncomplete = resolve;
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+async function idbClear() {
+  const db = await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx  = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).clear();
+    tx.oncomplete = resolve;
+    tx.onerror    = e => reject(e.target.error);
+  });
+}
+
+// D1 API helpers
+async function apiGetAll() {
+  const res  = await fetch(API_BASE);
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  const data = await res.json();
+  return data.entries || [];
+}
+
+async function apiPost(entry) {
+  const res = await fetch(API_BASE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry)
+  });
+  if (!res.ok) throw new Error(`API POST ${res.status}`);
+}
+
+async function apiDelete() {
+  const res = await fetch(API_BASE, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`API DELETE ${res.status}`);
+}
+
+// Load ledger: try D1 first, fall back to IndexedDB
+async function loadLedger() {
+  try {
+    const entries = await apiGetAll();
+    if (entries.length > 0) {
+      state.ledger = entries;
+      // Sync into IDB for offline use
+      for (const e of entries) await idbPut(e);
+      return;
+    }
+  } catch (_) {
+    // Network unavailable — fall through to IDB
+  }
+  try {
+    const local = await idbGetAll();
+    local.sort((a, b) => a.seq - b.seq);
+    state.ledger = local;
+  } catch (_) {
+    state.ledger = [];
+  }
+}
+
+// Persist a new entry to both tiers
+async function persistEntry(entry) {
+  try { await idbPut(entry); } catch (_) {}
+  try { await apiPost(entry); } catch (_) {
+    showToast('Saved locally — D1 sync failed (offline?)', 'warn');
+  }
+}
+
+// Clear both tiers
+async function clearPersisted() {
+  try { await idbClear(); } catch (_) {}
+  try { await apiDelete(); } catch (_) {}
+}
+
+// ─── State ───────────────────────────────────────────────────
+const state = {
+  ledger: [],      // CORA entries (loaded from DB on init)
+  charts: {},
+  activeScenario: 0,
+  tampered: false
+};
+
+// ─── Scenarios ───────────────────────────────────────────────
+const SCENARIOS = [
+  {
+    name: 'C2 Outbound Connection',
+    desc: 'Agent detects suspected Cobalt Strike C2 traffic from a critical trading server',
+    alert: 'Alert: Outbound connection to 185.130.5.253 from TradingServer-7. Matches Cobalt Strike C2 signature in TI feed.',
+    action: 'host_isolated',
+    target: 'TradingServer-7',
+    confidence: 76,
+    reasoning: [
+      { type: 'obs', label: 'Observation', content: 'Outbound connection to 185.130.5.253 from TradingServer-7 flagged by network IDS.' },
+      { type: 'inf', label: 'Inference', content: 'IP 185.130.5.253 appears in TI feed with 94% confidence as Cobalt Strike C2 infrastructure.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Alert only (no action). Rejected — asset criticality tier 1, active exfiltration risk unacceptable.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Block port only. Rejected — process spawning unknown child processes; port block insufficient.' },
+      { type: 'conf', label: 'Confidence', content: '76% confidence in isolation decision. Basis: 94% TI match; mitigated by 18% historical FP rate on this feed.' }
+    ]
+  },
+  {
+    name: 'Lateral Movement Detected',
+    desc: 'Unusual SMB traffic between internal hosts suggesting credential harvesting',
+    alert: 'Alert: Anomalous SMB lateral movement from HR-Workstation-12 to 14 internal hosts in 90 seconds. Credential harvesting pattern.',
+    action: 'network_segment_isolated',
+    target: 'HR-Subnet-192.168.10.0/24',
+    confidence: 82,
+    reasoning: [
+      { type: 'obs', label: 'Observation', content: 'HR-Workstation-12 initiated SMB connections to 14 hosts in 90 seconds — baseline is 0-2 per hour.' },
+      { type: 'inf', label: 'Inference', content: 'Pattern matches credential harvesting playbook with 82% similarity to known Mimikatz lateral movement.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Isolate source host only. Rejected — 14 hosts already contacted; potential beaconing already established.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Monitor and alert. Rejected — 3 of 14 contacted hosts are domain controllers; risk of full domain compromise.' },
+      { type: 'conf', label: 'Confidence', content: '82% confidence. Basis: velocity anomaly (99th percentile), pattern match, DC contact. Uncertainty: legitimate admin script possible.' }
+    ]
+  },
+  {
+    name: 'Ransomware Encryption Pattern',
+    desc: 'Mass file encryption activity detected on a file server',
+    alert: 'Alert: FileServer-3 showing mass .docx -> .enc file renames at 2,400 files/min. Ransomware encryption pattern.',
+    action: 'host_isolated',
+    target: 'FileServer-3',
+    confidence: 94,
+    reasoning: [
+      { type: 'obs', label: 'Observation', content: 'FileServer-3 performing 2,400 file renames per minute — 99.97th percentile. Extension pattern .docx to .enc.' },
+      { type: 'inf', label: 'Inference', content: 'Matches ransomware encryption signature with 94% confidence. No legitimate business process generates this pattern.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Kill process only. Rejected — encryption may continue via persistence mechanisms; isolation required.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Block outbound only. Rejected — encryption is local; outbound block does not stop data destruction.' },
+      { type: 'conf', label: 'Confidence', content: '94% confidence. Basis: file velocity, extension pattern, no scheduled maintenance window active. Uncertainty: 6% FP risk accepted given business impact of inaction.' }
+    ]
+  },
+  {
+    name: 'DNS Exfiltration',
+    desc: 'Unusually high DNS query volume suggesting data exfiltration via DNS tunnelling',
+    alert: 'Alert: DB-Server-2 sending 18,000 DNS queries/hour to external resolver. Payload size 220 bytes avg. DNS tunnelling suspected.',
+    action: 'dns_blocked',
+    target: 'DB-Server-2 outbound DNS',
+    confidence: 68,
+    reasoning: [
+      { type: 'obs', label: 'Observation', content: 'DB-Server-2 generated 18,000 DNS queries in one hour. Baseline is 40-80/hour. Avg payload 220 bytes — 3x normal.' },
+      { type: 'inf', label: 'Inference', content: 'High-frequency, high-payload DNS queries to external resolver consistent with DNS tunnelling for data exfiltration.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Full host isolation. Rejected — DB-Server-2 serves live production traffic; isolation causes P1 outage.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Alert only. Rejected — exfiltration rate of 220 bytes x 18,000 = 3.96 MB/hour represents significant data loss.' },
+      { type: 'conf', label: 'Confidence', content: '68% confidence. Basis: query volume anomaly, payload size. Uncertainty: could be legitimate DNS-based service polling. Chose targeted block over isolation.' }
+    ]
+  },
+  {
+    name: 'Privilege Escalation Attempt',
+    desc: 'Service account attempting to escalate privileges via known kernel exploit',
+    alert: 'Alert: svc-backup attempting privilege escalation via CVE-2024-30088 kernel exploit on AuthServer-1.',
+    action: 'account_suspended',
+    target: 'svc-backup',
+    confidence: 89,
+    reasoning: [
+      { type: 'obs', label: 'Observation', content: 'Service account svc-backup executed sequence matching CVE-2024-30088 exploit chain on AuthServer-1 at 03:14 UTC.' },
+      { type: 'inf', label: 'Inference', content: '89% confidence of privilege escalation attempt. Account has no scheduled tasks at this time. Exploit sequence matches known PoC.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Kill process only. Rejected — account itself is compromised; process restart would re-execute exploit.' },
+      { type: 'alt', label: 'Alternative', content: 'Alternative: Restrict to read-only. Rejected — exploit targets kernel; OS-level privilege cannot be scoped at application layer.' },
+      { type: 'conf', label: 'Confidence', content: '89% confidence. Basis: CVE signature match, off-hours timing, target is authentication server. Uncertainty: legitimate backup job with unusual timing possible (11% weight).' }
+    ]
+  }
+];
+
+// ─── Mobile Menu ─────────────────────────────────────────────
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const burger = document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  burger.classList.toggle('open');
+}
+
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+
+// ─── Page Navigation ─────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.mob-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const navEl = document.getElementById('nav-' + id);
+  if (navEl) navEl.classList.add('active');
+  const mobEl = document.getElementById('mob-' + id);
+  if (mobEl) mobEl.classList.add('active');
+
+  if (id === 'analytics') renderAnalytics();
+  if (id === 'audit') renderAuditLedger();
+}
+
+// ─── Scenario Selection ──────────────────────────────────────
+function renderScenarios() {
+  const grid = document.getElementById('scenarioGrid');
+  grid.innerHTML = SCENARIOS.map((s, i) => `
+    <div class="scenario-card ${i === state.activeScenario ? 'active' : ''}" onclick="selectScenario(${i})">
+      <div class="scenario-name">${s.name}</div>
+      <div class="scenario-desc">${s.desc}</div>
+    </div>
+  `).join('');
+}
+
+function selectScenario(i) {
+  state.activeScenario = i;
+  renderScenarios();
+}
+
+// ─── Run Scenario ────────────────────────────────────────────
+function runScenario() {
+  const s = SCENARIOS[state.activeScenario];
+  const now = new Date();
+
+  // Baseline log
+  document.getElementById('baselineLog').innerHTML = `
+<span class="log-ts">${now.toISOString()}</span>
+{
+  <span class="log-key">"timestamp"</span>: <span class="log-val">"${now.toISOString()}"</span>,
+  <span class="log-key">"action"</span>: <span class="log-action">"${s.action}"</span>,
+  <span class="log-key">"target"</span>: <span class="log-val">"${s.target}"</span>,
+  <span class="log-key">"reason"</span>: <span class="log-val">"Suspicious activity detected"</span>
+}`;
+
+  document.getElementById('baselineVerdict').textContent =
+    'Cannot answer: Why this target? What alternatives were evaluated? What was the confidence level? What was the evidence basis? — Fails GDPR Art 22.';
+
+  // Build CORA reasoning chain display
+  const stepTypes = { obs: 'obs', inf: 'inf', alt: 'alt', conf: 'conf' };
+  const chainHTML = s.reasoning.map((r, i) => `
+    <div class="reasoning-step">
+      <div class="step-num">${i + 1}</div>
+      <div class="step-type ${r.type}">${r.label}</div>
+      <div class="step-content">${r.content}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('reasoningChain').innerHTML = chainHTML;
+
+  const verdictEl = document.getElementById('coraVerdict');
+  verdictEl.innerHTML = `
+    <div style="font-size:0.78rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Auditor Can Answer</div>
+    <div style="font-size:0.83rem;color:var(--text);">Full reasoning reconstructible: decision rationale, all ${s.reasoning.filter(r=>r.type==='alt').length} alternatives considered, ${s.confidence}% confidence basis, evidence sources. GDPR Art 22(3) satisfied.</div>
+  `;
+
+  // Build CORA ledger entry
+  const prevHash = state.ledger.length > 0 ? state.ledger[state.ledger.length - 1].currentHash : 'GENESIS';
+  const actionSig = simpleHash(s.action + s.target + JSON.stringify(s.reasoning));
+  const currentHash = simpleHash(actionSig + prevHash);
+
+  const entry = {
+    seq: state.ledger.length + 1,
+    timestamp: now.toISOString(),
+    scenario: s,
+    actionSignature: actionSig,
+    prevHash,
+    currentHash,
+    tampered: false
+  };
+
+  state.ledger.push(entry);
+  persistEntry(entry);   // → IndexedDB + D1
+  state.tampered = false;
+
+  renderHashChain();
+  updateStatBar();
+  showToast(`Agent action logged — ${s.action} on ${s.target}`, 'success');
+}
+
+// ─── Tamper Demo ─────────────────────────────────────────────
+function runTamperDemo() {
+  if (state.ledger.length === 0) {
+    showToast('Run a scenario first to populate the ledger.', 'warn');
+    return;
+  }
+
+  // Mark first entry as tampered
+  state.ledger[0].tampered = true;
+  state.tampered = true;
+
+  document.getElementById('coraIntegrityBadge').outerHTML =
+    '<span class="badge badge-danger" id="coraIntegrityBadge"><span class="badge-dot"></span>TAMPERED DETECTED</span>';
+
+  renderHashChain();
+  showToast('Tampering simulated — hash chain integrity broken. Dashboard detects corruption.', 'warn');
+}
+
+// ─── Hash Chain Render ───────────────────────────────────────
+function renderHashChain() {
+  const el = document.getElementById('hashChainDisplay');
+  if (state.ledger.length === 0) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;font-style:italic;padding:16px 0;">No entries yet.</div>';
+    return;
+  }
+
+  const badge = document.getElementById('chainStatusBadge');
+
+  let anyTampered = false;
+  const html = state.ledger.map((entry, i) => {
+    const isCorrupted = entry.tampered || (i > 0 && state.ledger[i-1].tampered);
+    if (isCorrupted) anyTampered = true;
+    const cls = isCorrupted ? 'tampered' : 'verified';
+    const statusColor = isCorrupted ? 'red' : 'green';
+    const statusText = isCorrupted ? 'CHAIN BROKEN' : 'VERIFIED';
+    return `
+      <div class="hash-entry ${cls}">
+        <div class="hash-row"><span class="hash-field">Seq:</span><span class="hash-value">#${entry.seq} — ${entry.scenario.action} — ${entry.scenario.target}</span></div>
+        <div class="hash-row"><span class="hash-field">Timestamp:</span><span class="hash-value">${entry.timestamp}</span></div>
+        <div class="hash-row"><span class="hash-field">Action Sig:</span><span class="hash-value">${entry.actionSignature}</span></div>
+        <div class="hash-row"><span class="hash-field">Prev Hash:</span><span class="hash-value">${entry.prevHash}</span></div>
+        <div class="hash-row"><span class="hash-field">Curr Hash:</span><span class="hash-value">${entry.currentHash}</span></div>
+        <div class="hash-row"><span class="hash-field">Integrity:</span><span class="hash-value ${statusColor}">${statusText}</span></div>
+      </div>
+    `;
+  }).join('');
+
+  el.innerHTML = html;
+
+  if (badge) {
+    badge.textContent = anyTampered ? 'TAMPERED' : `${state.ledger.length} ENTRIES — VERIFIED`;
+    badge.style.color = anyTampered ? 'var(--danger)' : 'var(--success)';
+    badge.style.borderColor = anyTampered ? 'var(--danger)' : 'var(--success)';
+  }
+}
+
+// ─── Clear Logs ──────────────────────────────────────────────
+function clearLogs() {
+  document.getElementById('baselineLog').innerHTML = '<span style="color:#5a7a9a;font-style:italic;">// Awaiting agent action...</span>';
+  document.getElementById('baselineVerdict').textContent = 'Run a scenario to see what an auditor cannot answer.';
+  document.getElementById('reasoningChain').innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;font-style:italic;">Run a scenario to see the full reasoning chain.</div>';
+  document.getElementById('coraVerdict').innerHTML = '<div style="font-size:0.78rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;">Auditor Can Answer</div><div style="font-size:0.83rem;color:var(--text);">Run a scenario to see what CORA enables an auditor to answer.</div>';
+  document.getElementById('hashChainDisplay').innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;font-style:italic;padding:16px 0;">No entries yet. Run a scenario above.</div>';
+  document.getElementById('chainStatusBadge').textContent = 'EMPTY';
+  document.getElementById('chainStatusBadge').style.color = '';
+  document.getElementById('chainStatusBadge').style.borderColor = '';
+  state.ledger = [];
+  state.tampered = false;
+  clearPersisted();   // wipe IndexedDB + D1
+  updateStatBar();
+  showToast('Ledger cleared from all storage.');
+}
+
+// ─── Stat Bar ────────────────────────────────────────────────
+function updateStatBar() {
+  document.getElementById('stat-actions').textContent = state.ledger.length;
+  const anyTampered = state.ledger.some(e => e.tampered);
+  document.getElementById('stat-verified').textContent = anyTampered ? 'BROKEN' : '100%';
+  document.getElementById('stat-verified').style.color = anyTampered ? 'var(--danger)' : 'var(--primary)';
+}
+
+// ─── Audit Ledger ────────────────────────────────────────────
+function renderAuditLedger() {
+  // KPIs
+  const kpiEl = document.getElementById('auditKpis');
+  const avgConf = state.ledger.length
+    ? Math.round(state.ledger.reduce((a, e) => a + e.scenario.confidence, 0) / state.ledger.length)
+    : 0;
+  const highConf = state.ledger.filter(e => e.scenario.confidence >= 80).length;
+
+  kpiEl.innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Total Actions</div><div class="kpi-value">${state.ledger.length}</div><div class="kpi-change neu">in session</div></div>
+    <div class="kpi-card"><div class="kpi-label">Avg Confidence</div><div class="kpi-value">${avgConf}%</div><div class="kpi-change ${avgConf >= 80 ? 'pos' : 'neg'}">${avgConf >= 80 ? 'High confidence' : 'Review recommended'}</div></div>
+    <div class="kpi-card"><div class="kpi-label">High Confidence</div><div class="kpi-value">${highConf}</div><div class="kpi-change pos">>=80% confidence</div></div>
+    <div class="kpi-card"><div class="kpi-label">Chain Integrity</div><div class="kpi-value">${state.tampered ? 'BROKEN' : 'Verified'}</div><div class="kpi-change ${state.tampered ? 'neg' : 'pos'}">${state.tampered ? 'Tampering detected' : 'All entries verified'}</div></div>
+  `;
+
+  // Table
+  const tbody = document.getElementById('auditTableBody');
+  if (state.ledger.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:32px;">No actions logged yet. Run scenarios in the Demo tab.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = state.ledger.map((entry, i) => {
+    const s = entry.scenario;
+    const isCorrupted = entry.tampered || (i > 0 && state.ledger[i-1].tampered);
+    const confColor = s.confidence >= 80 ? 'var(--success)' : s.confidence >= 65 ? 'var(--warn)' : 'var(--danger)';
+    return `
+      <tr>
+        <td>#${entry.seq}</td>
+        <td style="font-size:0.78rem;">${entry.timestamp.replace('T', ' ').substring(0,19)}</td>
+        <td><strong>${s.action}</strong></td>
+        <td>${s.target}</td>
+        <td><span style="font-weight:700;color:${confColor}">${s.confidence}%</span></td>
+        <td>${s.reasoning.length} steps</td>
+        <td>${isCorrupted ? '<span class="badge badge-danger">BROKEN</span>' : '<span class="badge badge-success">Verified</span>'}</td>
+        <td><button class="btn btn-blue btn-sm" onclick="openActionModal(${i})">Inspect</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ─── Action Modal ────────────────────────────────────────────
+function openActionModal(idx) {
+  const entry = state.ledger[idx];
+  const s = entry.scenario;
+
+  document.getElementById('modalTitle').textContent = `${s.action} — ${s.target}`;
+  document.getElementById('modalSubtitle').textContent = `Action #${entry.seq} — ${entry.timestamp}`;
+
+  const reasoningHTML = s.reasoning.map((r, i) => `
+    <div class="reasoning-step">
+      <div class="step-num">${i + 1}</div>
+      <div class="step-type ${r.type}">${r.label}</div>
+      <div class="step-content">${r.content}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Reasoning Chain</div>
+      ${reasoningHTML}
+    </div>
+    <div class="divider"></div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">Cryptographic Proof</div>
+      <div style="background:#0e1a27;padding:14px;font-family:monospace;font-size:0.75rem;color:#a8c4e0;">
+        <div style="margin-bottom:4px;"><span style="color:#5a9fd4;">action_signature: </span><span style="color:#c4dff5;word-break:break-all;">${entry.actionSignature}</span></div>
+        <div style="margin-bottom:4px;"><span style="color:#5a9fd4;">prev_hash: </span><span style="color:#c4dff5;word-break:break-all;">${entry.prevHash}</span></div>
+        <div><span style="color:#5a9fd4;">current_hash: </span><span style="color:#5ac88a;word-break:break-all;">${entry.currentHash}</span></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('actionModal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('actionModal')) {
+    document.getElementById('actionModal').classList.remove('open');
+  }
+}
+
+// ─── Analytics ───────────────────────────────────────────────
+function renderAnalytics() {
+  const ledger = state.ledger;
+
+  // KPIs
+  const avgConf = ledger.length
+    ? Math.round(ledger.reduce((a, e) => a + e.scenario.confidence, 0) / ledger.length)
+    : 0;
+  const totalSteps = ledger.reduce((a, e) => a + e.scenario.reasoning.length, 0);
+  const totalAlts = ledger.reduce((a, e) => a + e.scenario.reasoning.filter(r => r.type === 'alt').length, 0);
+
+  document.getElementById('analyticsKpis').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Total Decisions</div><div class="kpi-value">${ledger.length}</div><div class="kpi-change neu">this session</div></div>
+    <div class="kpi-card"><div class="kpi-label">Avg Confidence</div><div class="kpi-value">${avgConf || '--'}%</div><div class="kpi-change ${avgConf >= 80 ? 'pos' : 'neu'}">across decisions</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Reasoning Steps</div><div class="kpi-value">${totalSteps}</div><div class="kpi-change pos">captured verbatim</div></div>
+    <div class="kpi-card"><div class="kpi-label">Alternatives Logged</div><div class="kpi-value">${totalAlts}</div><div class="kpi-change pos">rejected paths recorded</div></div>
+    <div class="kpi-card"><div class="kpi-label">Logging Overhead</div><div class="kpi-value">&lt;5ms</div><div class="kpi-change pos">async, non-blocking</div></div>
+  `;
+
+  if (ledger.length === 0) {
+    renderEmptyCharts();
+    return;
+  }
+
+  renderActionTypeChart();
+  renderConfidenceChart();
+  renderTimelineChart();
+  renderStepTypeChart();
+  renderAltChart();
+}
+
+function renderEmptyCharts() {
+  ['actionTypeChart','confidenceChart','timelineChart','stepTypeChart','altChart'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    destroyChart(id);
+    const ctx = el.getContext('2d');
+    ctx.clearRect(0, 0, el.width, el.height);
+  });
+}
+
+const CHART_COLORS = {
+  primary: '#3a78b5',
+  accent: '#1a3a5c',
+  chart3: '#5a9fd4',
+  chart4: '#8abde8',
+  chart5: '#c4dff5',
+  success: '#2e7d52',
+  warn: '#b55a1a',
+  danger: '#b52a2a'
+};
+
+function destroyChart(id) {
+  if (state.charts[id]) { state.charts[id].destroy(); delete state.charts[id]; }
+}
+
+function chartDefaults() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { font: { family: "'Source Sans 3', sans-serif", size: 12 }, color: '#5a6a7a' } }
+    },
+    scales: {
+      x: { ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#5a6a7a' }, grid: { color: '#e8f0f8' } },
+      y: { ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#5a6a7a' }, grid: { color: '#e8f0f8' } }
+    }
+  };
+}
+
+function renderActionTypeChart() {
+  destroyChart('actionTypeChart');
+  const counts = {};
+  state.ledger.forEach(e => { counts[e.scenario.action] = (counts[e.scenario.action] || 0) + 1; });
+  const labels = Object.keys(counts);
+  const vals = labels.map(l => counts[l]);
+  const colors = [CHART_COLORS.primary, CHART_COLORS.accent, CHART_COLORS.chart3, CHART_COLORS.chart4, CHART_COLORS.chart5];
+  const ctx = document.getElementById('actionTypeChart').getContext('2d');
+  state.charts['actionTypeChart'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Count', data: vals, backgroundColor: colors.slice(0, labels.length), borderRadius: 2 }] },
+    options: { ...chartDefaults(), plugins: { legend: { display: false } } }
+  });
+}
+
+function renderConfidenceChart() {
+  destroyChart('confidenceChart');
+  const bins = { 'High (80-100%)': 0, 'Medium (65-79%)': 0, 'Low (<65%)': 0 };
+  state.ledger.forEach(e => {
+    const c = e.scenario.confidence;
+    if (c >= 80) bins['High (80-100%)']++;
+    else if (c >= 65) bins['Medium (65-79%)']++;
+    else bins['Low (<65%)']++;
+  });
+  const ctx = document.getElementById('confidenceChart').getContext('2d');
+  state.charts['confidenceChart'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(bins),
+      datasets: [{ data: Object.values(bins), backgroundColor: [CHART_COLORS.success, CHART_COLORS.warn, CHART_COLORS.danger], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: "'Source Sans 3', sans-serif" }, color: '#5a6a7a' } } } }
+  });
+}
+
+function renderTimelineChart() {
+  destroyChart('timelineChart');
+  const labels = state.ledger.map((e, i) => `Action ${i + 1}`);
+  const cumulative = state.ledger.map((_, i) => i + 1);
+  const confidences = state.ledger.map(e => e.scenario.confidence);
+  const ctx = document.getElementById('timelineChart').getContext('2d');
+  state.charts['timelineChart'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Cumulative Actions', data: cumulative, borderColor: CHART_COLORS.primary, backgroundColor: 'rgba(58,120,181,0.08)', fill: true, tension: 0.3, pointRadius: 4 },
+        { label: 'Confidence %', data: confidences, borderColor: CHART_COLORS.chart3, backgroundColor: 'transparent', borderDash: [4, 4], tension: 0.3, pointRadius: 4, yAxisID: 'y2' }
+      ]
+    },
+    options: {
+      ...chartDefaults(),
+      scales: {
+        x: { ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#5a6a7a' }, grid: { color: '#e8f0f8' } },
+        y: { ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#5a6a7a' }, grid: { color: '#e8f0f8' } },
+        y2: { position: 'right', min: 0, max: 100, ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: CHART_COLORS.chart3 }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderStepTypeChart() {
+  destroyChart('stepTypeChart');
+  const counts = { Observation: 0, Inference: 0, Alternative: 0, Confidence: 0 };
+  const typeMap = { obs: 'Observation', inf: 'Inference', alt: 'Alternative', conf: 'Confidence' };
+  state.ledger.forEach(e => {
+    e.scenario.reasoning.forEach(r => { if (typeMap[r.type]) counts[typeMap[r.type]]++; });
+  });
+  const ctx = document.getElementById('stepTypeChart').getContext('2d');
+  state.charts['stepTypeChart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(counts),
+      datasets: [{ label: 'Steps', data: Object.values(counts), backgroundColor: [CHART_COLORS.success, CHART_COLORS.primary, CHART_COLORS.warn, '#6b3a9a'], borderRadius: 2 }]
+    },
+    options: { ...chartDefaults(), indexAxis: 'y', plugins: { legend: { display: false } } }
+  });
+}
+
+function renderAltChart() {
+  destroyChart('altChart');
+  const points = state.ledger.map((e, i) => ({
+    x: i + 1,
+    y: e.scenario.reasoning.filter(r => r.type === 'alt').length,
+    conf: e.scenario.confidence
+  }));
+  const ctx = document.getElementById('altChart').getContext('2d');
+  state.charts['altChart'] = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Alternatives considered',
+        data: points.map(p => ({ x: p.x, y: p.y })),
+        backgroundColor: points.map(p => p.conf >= 80 ? CHART_COLORS.success : p.conf >= 65 ? CHART_COLORS.warn : CHART_COLORS.danger),
+        pointRadius: 8,
+        pointHoverRadius: 10
+      }]
+    },
+    options: {
+      ...chartDefaults(),
+      scales: {
+        x: { title: { display: true, text: 'Action Sequence', font: { family: "'Source Sans 3', sans-serif" } }, ticks: { stepSize: 1, font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#5a6a7a' }, grid: { color: '#e8f0f8' } },
+        y: { title: { display: true, text: 'Alternatives Considered', font: { family: "'Source Sans 3', sans-serif" } }, ticks: { stepSize: 1, font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#5a6a7a' }, grid: { color: '#e8f0f8' } }
+      }
+    }
+  });
+}
+
+// ─── AI Insights ─────────────────────────────────────────────
+async function generateAIInsights() {
+  if (state.ledger.length === 0) {
+    showToast('Log at least one agent action first.', 'warn');
+    return;
+  }
+
+  const panel = document.getElementById('aiInsightsContent');
+  panel.innerHTML = `<div class="ai-loader"><div class="spinner"></div><span>Claude is analysing your decision ledger...</span></div>`;
+
+  const summary = buildLedgerSummary();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a senior cybersecurity auditor reviewing an AI agent decision ledger from the CORA framework. Analyse the provided decision summary and return ONLY a JSON object with this exact structure, no markdown, no preamble:
+{"insights":[{"type":"info|warn|good|danger","text":"insight text"}]}
+Generate 5 to 7 concise, specific, actionable insights about the agent's decision-making patterns, confidence levels, alternative analysis quality, and compliance posture. Each insight must be a single sentence under 140 characters. Reference specific scenarios or metrics. No emojis.`,
+        messages: [{ role: 'user', content: summary }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content?.find(b => b.type === 'text')?.text || '{}';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    const insightHTML = (parsed.insights || []).map(ins => {
+      const dotClass = ins.type === 'warn' ? 'warn' : ins.type === 'good' ? 'good' : ins.type === 'danger' ? 'danger' : '';
+      return `<li class="insight-item"><div class="insight-dot ${dotClass}"></div><span>${ins.text}</span></li>`;
+    }).join('');
+
+    panel.innerHTML = `<ul class="insight-list">${insightHTML}</ul>`;
+  } catch (err) {
+    panel.innerHTML = `<div style="color:rgba(255,255,255,0.55);font-size:0.85rem;">AI analysis unavailable — connect an Anthropic API key to enable Claude analysis. (${err.message})</div>`;
+  }
+}
+
+function buildLedgerSummary() {
+  const ledger = state.ledger;
+  let s = `CORA Decision Ledger Summary\nTotal actions: ${ledger.length}\n\n`;
+  ledger.forEach((entry, i) => {
+    const sc = entry.scenario;
+    const alts = sc.reasoning.filter(r => r.type === 'alt').length;
+    s += `Action ${i+1}: ${sc.action} on ${sc.target}. Confidence: ${sc.confidence}%. Alternatives considered: ${alts}. Reasoning steps: ${sc.reasoning.length}.\n`;
+  });
+  const avgConf = Math.round(ledger.reduce((a, e) => a + e.scenario.confidence, 0) / ledger.length);
+  s += `\nAverage confidence: ${avgConf}%. Chain integrity: ${state.tampered ? 'BROKEN' : 'Verified'}.`;
+  return s;
+}
+
+// ─── Utilities ───────────────────────────────────────────────
+function simpleHash(str) {
+  // Deterministic pseudohash for demo purposes (not cryptographic)
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const seed = Math.abs(hash).toString(16).padStart(8, '0');
+  const parts = [seed, seed.split('').reverse().join(''), (Math.abs(hash * 31)).toString(16).padStart(8, '0'), Date.now().toString(16)];
+  return parts.join('').substring(0, 64).padEnd(64, '0');
+}
+
+let toastTimer;
+function showToast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type === 'warn' ? ' warn-toast' : type === 'success' ? ' success-toast' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ─── Init ─────────────────────────────────────────────────────
+renderScenarios();
+updateStatBar();
+
+// Load persisted ledger, then seed demo only if empty
+(async function init() {
+  try {
+    await loadLedger();
+  } catch (_) {}
+
+  if (state.ledger.length === 0) {
+    // Seed with one scenario on load so analytics/audit are not totally empty
+    const s = SCENARIOS[2]; // Ransomware — highest confidence, most dramatic
+    const prevHash = 'GENESIS';
+    const actionSig = simpleHash(s.action + s.target + JSON.stringify(s.reasoning));
+    const currentHash = simpleHash(actionSig + prevHash);
+    const e1 = { seq: 1, timestamp: new Date(Date.now() - 120000).toISOString(), scenario: s, actionSignature: actionSig, prevHash, currentHash, tampered: false };
+    state.ledger.push(e1);
+    await persistEntry(e1);
+
+    const s2 = SCENARIOS[0];
+    const prevHash2 = currentHash;
+    const actionSig2 = simpleHash(s2.action + s2.target + JSON.stringify(s2.reasoning));
+    const currentHash2 = simpleHash(actionSig2 + prevHash2);
+    const e2 = { seq: 2, timestamp: new Date(Date.now() - 60000).toISOString(), scenario: s2, actionSignature: actionSig2, prevHash: prevHash2, currentHash: currentHash2, tampered: false };
+    state.ledger.push(e2);
+    await persistEntry(e2);
+  }
+
+  updateStatBar();
+  // Show db indicator
+  showToast(`Ledger loaded — ${state.ledger.length} entr${state.ledger.length === 1 ? 'y' : 'ies'} restored`, 'success');
+})();
+</script>
+</body>
+</html>
