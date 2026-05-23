@@ -11,4 +11,4 @@ command = ""
 binding  = "DB"
 database_name = "cora-ledger"
 # Replace with the ID returned by: wrangler d1 create cora-ledger
-database_id   = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id   = "e3997a6c-75fb-4aa5-b53c-b6e63c229944"
