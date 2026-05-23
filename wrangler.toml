@@ -1,4 +1,4 @@
-name = "cora-framework"
+name = "research-prototype"
 main = "src/worker.js"
 compatibility_date = "2024-09-23"
 
