@@ -1,0 +1,14 @@
+name = "cora-framework"
+main = "src/worker.js"
+compatibility_date = "2024-09-23"
+
+# ── Static HTML bundled as a module import ────────────────────
+[build]
+command = ""
+
+# ── D1 Database binding ───────────────────────────────────────
+[[d1_databases]]
+binding  = "DB"
+database_name = "cora-ledger"
+# Replace with the ID returned by: wrangler d1 create cora-ledger
+database_id   = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
